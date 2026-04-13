@@ -5,24 +5,28 @@ import { UsersRound } from "lucide-react";
 import { UserCheck } from "lucide-react";
 import { DollarSign } from "lucide-react";
 import { MessageSquare } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 
 const Sidebar = () => {
   return (
-    <div className="min-h-screen w-72 bg-white">
-      <div className="p-5 flex  items-center gap-2">
+    <div className="min-h-screen w-72 bg-white border-r-2 border-gray-200">
+      <div className="p-5 flex  items-center gap-2 border-b-2 border-gray-200">
         <h2 className="p-2 bg-blue-600 rounded-full text-white font-bold">
           AL
         </h2>
         <h1 className="font-bold">AUC Law</h1>
       </div>
-      <hr />
 
       <div className="pt-3 pl-1">
         <p className="font-semibold text-gray-400 text-[10px] pl-2">
           ORGANIZATION
         </p>
         <ul className="pt-4 pl-3 flex flex-col gap-5">
-          <li className="text-gray-500 text-[13px] font-bold hover:text-gray-700 text-sm">
+          <li className="text-gray-500 text-[13px] font-bold hover:text-gray-700 text-sm flex items-center gap-1">
+            <LayoutDashboard
+              size={30}
+              className="bg-gray-200 p-2 rounded-xl "
+            />
             Admin Dashboard
           </li>
           <li className="text-gray-500 text-[13px] font-bold hover:text-gray-700 text-sm flex items-center gap-1">
