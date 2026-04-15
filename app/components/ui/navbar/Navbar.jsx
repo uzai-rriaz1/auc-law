@@ -3,6 +3,9 @@ import { Briefcase } from "lucide-react";
 import { CalendarCheck } from "lucide-react";
 import { UsersRound } from "lucide-react";
 import { UserCheck } from "lucide-react";
+import { Search } from "lucide-react";
+import { Moon } from "lucide-react";
+import { Clock } from "lucide-react";
 
 const Navbar = () => {
   return (
@@ -33,16 +36,24 @@ const Navbar = () => {
           </li>
         </ul>
       </nav>
-      <div className="pt-2 border-b-2 border-gray-200 pb-2">
+      <div className="flex pt-2 border-b-2 border-gray-200 pb-2 justify-between items-center">
         <input
-          placeholder={`Search Cases, Clients or Documents... `}
+          placeholder="Search Cases, Clients or Documents... "
           type="text"
           className="p-2 ml-2 w-sm bg-gray-200 rounded-xl h-8 text-sm"
         />
-        <ul>
-          <li></li>
-          <li></li>
-          <li></li>
+
+        <ul className="flex justify-center items-center gap-6 mr-1">
+          <li className="hover:bg-gray-200 rounded-2xl p-2">
+            <Moon size={20} />
+          </li>
+          <li className="flex justify-center items-center gap-2  hover:bg-gray-200 rounded-2xl p-2">
+            <Clock size={20} />{" "}
+            <p className="font-bold text-[13px]">Activity</p>
+          </li>
+          <li>
+            <button className="bg-gray-300 p-4 rounded-full"></button>
+          </li>
         </ul>
       </div>
     </div>
