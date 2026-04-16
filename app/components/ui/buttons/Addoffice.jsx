@@ -1,11 +1,14 @@
 "use client";
 import React from "react";
 import { Plus } from "lucide-react";
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
-
+import { useSelector } from "react-redux";
 const Addoffice = ({ name, className }) => {
+  const token = useSelector((state) => state.user.token);
+
+  const org_id = 23;
   const {
     handleSubmit,
     register,
@@ -20,6 +23,11 @@ const Addoffice = ({ name, className }) => {
         const res = await axios.post(
           "https://aucapi-staging.villaextech.com/offices",
           data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
         if (res) console.log(res);
       } catch (error) {
@@ -38,6 +46,8 @@ const Addoffice = ({ name, className }) => {
     officeMutation.mutate(data);
 
     const form = document.getElementById("office-form");
+    const dialog = document.getElementById("form-modal");
+    dialog.close();
     form.reset();
   };
 
@@ -56,7 +66,7 @@ const Addoffice = ({ name, className }) => {
           <h1 className="text-start">Add New Office</h1>
           <input
             hidden
-            value={18}
+            value={org_id}
             type="text"
             {...register("organisation_id", { required: true })}
             className="w-sm p-3 rounded-2xl outline-1 shadow-2xl outline-gray-200"
