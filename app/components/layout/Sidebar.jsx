@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Briefcase } from "lucide-react";
 import { CalendarCheck } from "lucide-react";
@@ -7,8 +8,9 @@ import { DollarSign } from "lucide-react";
 import { MessageSquare } from "lucide-react";
 import { LayoutDashboard } from "lucide-react";
 import AuthCheck from "@/app/authWrapper/authCheck";
-
+import { useRouter } from "next/navigation";
 const Sidebar = () => {
+  const router = useRouter();
   return (
     <AuthCheck>
       <div className="max-h-screen w-64 bg-white border-r border-gray-200 pt-0 mt-0">
@@ -31,7 +33,10 @@ const Sidebar = () => {
               />
               Admin Dashboard
             </li>
-            <li className="text-gray-500 text-[13px] font-bold hover:text-gray-700 text-sm flex items-center gap-1">
+            <li
+              onClick={() => router.push("/Team")}
+              className="text-gray-500 text-[13px] font-bold hover:text-gray-700 text-sm flex items-center gap-1"
+            >
               <UsersRound size={30} className="bg-gray-200 p-2 rounded-xl " />{" "}
               Team
             </li>

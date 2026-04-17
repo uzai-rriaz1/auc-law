@@ -2,9 +2,9 @@
 import React from "react";
 import { Plus } from "lucide-react";
 
-const Adddepartment = ({ name, className }) => {
+const Adddepartment = ({ onClick, name, className }) => {
   return (
-    <button className={className}>
+    <button onClick={onClick} className={className}>
       <Plus size={18} className="text-gray-600" />
       {name}
     </button>
