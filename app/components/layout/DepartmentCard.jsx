@@ -140,7 +140,7 @@ const DepartmentCard = () => {
             },
           },
         );
-        if (res) console.log(res);
+        if (res) console.log(res.data);
         return res.data;
       } catch (error) {
         return "departs didnt fetched";

@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 const Signin = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const token = useSelector((state) => state.user.token);
 
   const {
     handleSubmit,
@@ -60,36 +61,38 @@ const Signin = () => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(Submithandle)}
-      action=""
-      className="flex flex-col items-center justify-center gap-6 mt-5 border-2 w-lg h-[70vh]"
-    >
-      <h1 className="text-start font-bold text-2xl">Sign In</h1>
-      <p className="text-[15px]">
-        Enter your credentials to access your account
-      </p>
-
-      <input
-        placeholder="Enter Your username"
-        type="text"
-        {...register("username", { required: true })}
-        className="w-sm p-3 rounded-2xl outline-1 shadow-2xl outline-gray-200"
-      />
-      <input
-        placeholder="Enter Your Pass"
-        type="text"
-        {...register("password", { required: true })}
-        className="w-sm p-3 rounded-2xl outline-1 shadow-2xl outline-gray-200"
-      />
-
-      <button
-        type="submit"
-        className="pl-5 pr-5 p-3 bg-blue-500 rounded-2xl shadow-lg"
+    <section className="absolute left-90 flex justify-center items-center">
+      <form
+        onSubmit={handleSubmit(Submithandle)}
+        action=""
+        className="flex flex-col items-center justify-center gap-6 mt-5 border-2 border-amber-50 shadow-2xl rounded-2xl w-lg h-[70vh]"
       >
-        Login
-      </button>
-    </form>
+        <h1 className="text-start font-bold text-2xl">Sign In</h1>
+        <p className="text-[15px]">
+          Enter your credentials to access your account
+        </p>
+
+        <input
+          placeholder="Enter Your username"
+          type="text"
+          {...register("username", { required: true })}
+          className="w-sm p-3 rounded-2xl outline-1 shadow-2xl outline-gray-200"
+        />
+        <input
+          placeholder="Enter Your Pass"
+          type="text"
+          {...register("password", { required: true })}
+          className="w-sm p-3 rounded-2xl outline-1 shadow-2xl outline-gray-200"
+        />
+
+        <button
+          type="submit"
+          className="pl-5 pr-5 p-3 bg-blue-500 rounded-2xl shadow-lg"
+        >
+          Login
+        </button>
+      </form>
+    </section>
   );
 };
 

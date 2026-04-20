@@ -1,7 +1,12 @@
 import React from "react";
+import TeamComponent from "./components/TeamComponent";
 
 const page = () => {
-  return <div>Team</div>;
+  return (
+    <>
+      <TeamComponent />
+    </>
+  );
 };
 
 export default page;

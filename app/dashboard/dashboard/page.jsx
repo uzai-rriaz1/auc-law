@@ -7,6 +7,7 @@ import { UserCheck } from "lucide-react";
 
 import AuthCheck from "@/app/authWrapper/authCheck";
 import DepartmentCard from "../../components/layout/DepartmentCard";
+
 const Dashboard = () => {
   const handleclick = () => {};
   return (

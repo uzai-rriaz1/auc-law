@@ -26,7 +26,10 @@ const Sidebar = () => {
             ORGANIZATION
           </p>
           <ul className="pt-4 pl-3 flex flex-col gap-5">
-            <li className="text-gray-500 text-[13px] font-bold hover:text-gray-700 text-sm flex items-center gap-1">
+            <li
+              onClick={() => router.push("/dashboard/dashboard")}
+              className="text-gray-500 text-[13px] font-bold hover:text-gray-700 text-sm flex items-center gap-1"
+            >
               <LayoutDashboard
                 size={30}
                 className="bg-gray-200 p-2 rounded-xl "
