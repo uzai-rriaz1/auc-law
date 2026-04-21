@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
@@ -8,7 +8,14 @@ import { Trash } from "lucide-react";
 
 const TeamComponent = () => {
   const { formState, handleSubmit, register, reset } = useForm();
+  const {
+    register: register2,
+    handleSubmit: handleSubmit2,
+    reset: reset2,
+    formState: formState2,
+  } = useForm();
   const [search, setSearch] = React.useState("");
+  const [memId, setMemId] = useState(null);
 
   const token = useSelector((state) => state.user.token);
   const queryClient = useQueryClient();
@@ -33,8 +40,7 @@ const TeamComponent = () => {
     },
     refetchInterval: 5000,
   });
-  let orgarray = data?.map((item) => item.organisation_id);
-  const orgid = orgarray[0];
+  const orgid = data?.[0]?.organisation_id ?? 23;
 
   const { data: departList } = useQuery({
     queryKey: ["list"],
@@ -81,6 +87,27 @@ const TeamComponent = () => {
     },
     refetchOnWindowFocus: false,
     staleTime: 10000,
+  });
+
+  const { data: teammemeber } = useQuery({
+    queryKey: ["teammember"],
+    queryFn: async () => {
+      const res = await axios.get(
+        `https://aucapi-staging.villaextech.com/team-members/${memId}`,
+
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (res) console.log(res.data);
+      //   if (!res) console.log("data didnt fetched", res);
+      return await res.data;
+    },
+    refetchOnWindowFocus: false,
+    // staleTime: 10000,
+    enabled: !!memId,
   });
 
   const createMember = useMutation({
@@ -139,11 +166,51 @@ const TeamComponent = () => {
     },
   });
 
+  const updateMember = useMutation({
+    mutationKey: ["updateMember"],
+    mutationFn: async ({ data, id }) => {
+      const res = await axios.put(
+        `https://aucapi-staging.villaextech.com/team-members/${id}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (res) console.log(res.data);
+      //   if (!res) console.log("data didnt fetched", res);
+      return await res.data;
+    },
+    onError: (error) => {
+      console.log("ERROR DETAIL →", error.response?.data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["members"],
+      });
+    },
+  });
+
   const onSubmit = async (data) => {
     try {
       await createMember.mutateAsync(data);
       reset();
       document.getElementById("member-modal").close();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const onSubmit2 = async (updatedata) => {
+    try {
+      await updateMember.mutate({
+        id: memId,
+        data: updatedata,
+      });
+      reset2();
+      const modal = document.getElementById("update-modal");
+      modal.close();
     } catch (err) {
       console.error(err);
     }
@@ -240,7 +307,46 @@ const TeamComponent = () => {
               <button className="flex-1 border rounded-xl py-2 text-sm hover:bg-gray-50">
                 View
               </button>
-              <button className="flex-1 bg-blue-600 text-white rounded-xl py-2 text-sm hover:bg-blue-700">
+              <button
+                onClick={() => {
+                  const modal = document.getElementById("update-modal");
+                  modal.showModal();
+                  setMemId(memeber.id);
+
+                  reset2({
+                    fullname: teammemeber.fullname,
+                    email: teammemeber.email,
+                    password: "",
+                    organisation_id: teammemeber.organisation_id,
+
+                    primary_department: teammemeber.primary_department,
+                    secondary_department: teammemeber.secondary_department,
+                    secondary_department_ids:
+                      teammemeber.secondary_department_ids,
+                    mobile_no: teammemeber.mobile_no,
+                    alternative_no: teammemeber.alternative_no,
+                    date_of_birth: teammemeber.date_of_birth,
+                    date_of_join: teammemeber.date_of_join,
+                    cnic: teammemeber.cnic,
+                    qualification: teammemeber.qualification,
+                    designation: teammemeber.designation,
+                    advocate: teammemeber.advocate,
+                    address: teammemeber.address,
+                    city: teammemeber.city,
+                    lower_courts: teammemeber.lower_courts,
+                    lower_court_date: teammemeber.lower_court_date,
+                    higher_courts: teammemeber.higher_courts,
+                    higher_court_date: teammemeber.higher_court_date,
+                    supreme_courts: teammemeber.supreme_courts,
+                    supreme_court_date: teammemeber.supreme_court_date,
+
+                    role: teammemeber.role,
+                    location: teammemeber.location,
+                    status: teammemeber.status,
+                  });
+                }}
+                className="flex-1 bg-blue-600 text-white rounded-xl py-2 text-sm hover:bg-blue-700"
+              >
                 Edit
               </button>
               <button
@@ -253,7 +359,6 @@ const TeamComponent = () => {
           </div>
         ))}
       </section>
-
       {
         <dialog id="member-modal">
           <form
@@ -336,7 +441,7 @@ const TeamComponent = () => {
                           required: true,
                         })}
                         type="hidden"
-                        value={orgid}
+                        value={orgid || 23}
                       />
                     </div>
 
@@ -387,6 +492,13 @@ const TeamComponent = () => {
                         {...register("cnic", {})}
                         className="w-full border rounded-xl px-3 py-2"
                         placeholder="xxxxx-xxxxxxx-x"
+                      />
+                      <input
+                        {...register("organisation_id", {
+                          required: true,
+                        })}
+                        type="hidden"
+                        value={orgid}
                       />
                       <select
                         {...register("status", { required: true })}
@@ -451,13 +563,6 @@ const TeamComponent = () => {
                             key={officename.id}
                             label={officename?.name}
                           >
-                            <input
-                              {...register("organisation_id", {
-                                required: true,
-                              })}
-                              type="hidden"
-                              value={officename.organisation_id}
-                            />
                             {departList
                               ?.filter(
                                 (option) => option.office_id === officename.id,
@@ -647,6 +752,405 @@ const TeamComponent = () => {
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg"
                 >
                   Add Member
+                </button>
+              </div>
+            </div>
+          </form>
+        </dialog>
+      }
+      {
+        <dialog id="update-modal">
+          <form
+            onSubmit={handleSubmit2(onSubmit2)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          >
+            <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-600 to-teal-500 text-white">
+                <div>
+                  <h2 className="text-lg font-semibold">Add Team Member</h2>
+                  <p className="text-sm opacity-90">
+                    Add a new member to your team
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const modal = document.getElementById("update-modal");
+                    modal.close();
+                  }}
+                  className="text-xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* BASIC INFO */}
+                <div className="border rounded-xl p-4">
+                  <h3 className="text-sm font-semibold mb-4 text-gray-700">
+                    Basic Information
+                  </h3>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-gray-500">Full Name</label>
+                      <input
+                        {...register2("fullname", {
+                          required: true,
+                        })}
+                        className="w-full border rounded-xl px-3 py-2"
+                        placeholder="Enter full name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">Email</label>
+                      <input
+                        {...register2("email", {
+                          required: true,
+                        })}
+                        className="w-full border rounded-xl px-3 py-2"
+                        placeholder="Enter email"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">Password</label>
+                      <input
+                        {...register2("password", {
+                          required: true,
+                        })}
+                        type="password"
+                        className="w-full border rounded-xl px-3 py-2"
+                        placeholder="Enter password"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">Mobile No</label>
+                      <input
+                        defaultValue={""}
+                        {...register2("mobile_no", {})}
+                        className="w-full border rounded-xl px-3 py-2"
+                        placeholder="Enter mobile number"
+                      />
+                      <input
+                        {...register2("organisation_id", {
+                          required: true,
+                        })}
+                        type="hidden"
+                        value={orgid}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">
+                        Alternate No
+                      </label>
+                      <input
+                        defaultValue={""}
+                        {...register2("alternative_no", {})}
+                        className="w-full border rounded-xl px-3 py-2"
+                        placeholder="Enter alternate number"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">
+                        Date of Birth
+                      </label>
+                      <input
+                        {...register2("date_of_birth", {
+                          setValueAs: (v) =>
+                            v ? new Date(v).toISOString() : undefined,
+                        })}
+                        type="date"
+                        className="w-full border rounded-xl px-3 py-2"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">
+                        Date of Joining
+                      </label>
+                      <input
+                        {...register2("date_of_join", {
+                          setValueAs: (v) =>
+                            v ? new Date(v).toISOString() : undefined,
+                        })}
+                        type="date"
+                        className="w-full border rounded-xl px-3 py-2"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">CNIC</label>
+                      <input
+                        defaultValue={""}
+                        {...register2("cnic", {})}
+                        className="w-full border rounded-xl px-3 py-2"
+                        placeholder="xxxxx-xxxxxxx-x"
+                      />
+                      <input
+                        {...register2("organisation_id", {
+                          required: true,
+                        })}
+                        type="hidden"
+                        value={orgid}
+                      />
+                      <select
+                        {...register2("status", { required: true })}
+                        name=""
+                        id=""
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* DEPARTMENT */}
+                <div className="border rounded-xl p-4">
+                  <h3 className="text-sm font-semibold mb-4 text-gray-700">
+                    Department Assignment
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs text-gray-500">
+                        Primary Department
+                      </label>
+                      <select
+                        {...register2("primary_department_id", {
+                          required: true,
+                        })}
+                        className="w-full border rounded-xl px-3 py-2"
+                      >
+                        {data?.map((officename) => (
+                          <optgroup
+                            key={officename.id}
+                            label={officename?.name}
+                          >
+                            {departList
+                              ?.filter(
+                                (option) => option.office_id === officename.id,
+                              )
+                              .map((option) => (
+                                <option key={option.id} value={option.id}>
+                                  {option.name}
+                                </option>
+                              ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">
+                        Secondary Departments
+                      </label>
+                      <select
+                        {...register2("primary_department_id", {
+                          required: true,
+                        })}
+                        className="w-full border rounded-xl px-3 py-2"
+                      >
+                        {data?.map((officename) => (
+                          <optgroup
+                            key={officename.id}
+                            label={officename?.name}
+                          >
+                            {departList
+                              ?.filter(
+                                (option) => option.office_id === officename.id,
+                              )
+                              .map((option) => (
+                                <option key={option.id} value={option.id}>
+                                  {option.name}
+                                </option>
+                              ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* PROFESSIONAL */}
+                <div className="border rounded-xl p-4">
+                  <h3 className="text-sm font-semibold mb-4 text-gray-700">
+                    Professional Information
+                  </h3>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-gray-500">
+                        Qualification
+                      </label>
+                      <input
+                        defaultValue={""}
+                        {...register2("qualification")}
+                        className="w-full border rounded-xl px-3 py-2"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">
+                        Designation
+                      </label>
+                      <input
+                        defaultValue={""}
+                        {...register2("designation")}
+                        className="w-full border rounded-xl px-3 py-2"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">Advocate</label>
+                      <select
+                        defaultValue={""}
+                        {...register2("advocate")}
+                        className="w-full border rounded-xl px-3 py-2"
+                      >
+                        <option value="Lower Court">Lower Court</option>
+                        <option value="High Court">High Court</option>
+                        <option value="Supreme Court">Supreme Court</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">Role</label>
+                      <select
+                        {...register2("role", { required: true })}
+                        className="w-full border rounded-xl px-3 py-2"
+                      >
+                        <option value="AUTHORIZED_MEMBER">
+                          Authorzid Member
+                        </option>
+                        <option value="RESTRICTED_MEMBER">
+                          Restricted Member
+                        </option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="SUPER_ADMIN">Super Admin</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ADDRESS */}
+                <div className="border rounded-xl p-4">
+                  <h3 className="text-sm font-semibold mb-4 text-gray-700">
+                    Address Information
+                  </h3>
+
+                  <textarea
+                    defaultValue={""}
+                    {...register2("address")}
+                    className="w-full border rounded-xl px-3 py-2"
+                    placeholder="Enter complete address"
+                  />
+                </div>
+
+                {/* ENROLLMENT */}
+                <div className="border rounded-xl p-4">
+                  <h3 className="text-sm font-semibold mb-4 text-gray-700">
+                    Enrollment Dates
+                  </h3>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <input
+                      {...register2("lower_courts", {
+                        setValueAs: (v) =>
+                          v ? new Date(v).toISOString() : undefined,
+                      })}
+                      className="border rounded-xl px-3 py-2"
+                      placeholder="Lower Courts"
+                    />
+                    <input
+                      {...register2("lower_court_date", {
+                        setValueAs: (v) =>
+                          v ? new Date(v).toISOString() : undefined,
+                      })}
+                      type="date"
+                      className="border rounded-xl px-3 py-2"
+                    />
+
+                    <input
+                      defaultValue={""}
+                      {...register2("higher_courts")}
+                      className="border rounded-xl px-3 py-2"
+                      placeholder="Higher Courts"
+                    />
+                    <input
+                      {...register2("higher_court_date", {
+                        setValueAs: (v) =>
+                          v ? new Date(v).toISOString() : undefined,
+                      })}
+                      type="date"
+                      className="border rounded-xl px-3 py-2"
+                    />
+
+                    <input
+                      defaultValue={""}
+                      {...register2("supreme_courts")}
+                      className="border rounded-xl px-3 py-2"
+                      placeholder="Supreme Court"
+                    />
+                    <input
+                      {...register2("supreme_court_date", {
+                        setValueAs: (v) =>
+                          v ? new Date(v).toISOString() : undefined,
+                      })}
+                      type="date"
+                      className="border rounded-xl px-3 py-2"
+                    />
+                  </div>
+                </div>
+
+                {/* PHOTO */}
+                {/* <div className="border rounded-xl p-4">
+                  <h3 className="text-sm font-semibold mb-4 text-gray-700">
+                    Photo
+                  </h3>
+
+                  <div className="border border-blue-200 rounded-xl p-5 bg-blue-50/40">
+                    <div className="border-2 border-dashed border-blue-300 rounded-xl py-10 flex flex-col items-center justify-center text-center">
+                      <div className="w-14 h-14 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-3 text-xl">
+                        ⬆
+                      </div>
+                      <input
+                        required={false}
+                        accept="image/*"
+                        type="file"
+                        className="text-sm font-semibold text-gray-700"
+                      ></input>
+                      <p className="text-xs text-gray-400 mt-1">
+                        JPG, JPEG, PNG, GIF up to 5MB
+                      </p>
+                    </div>
+                  </div>
+                </div> */}
+              </div>
+
+              {/* Footer */}
+              <div className="flex justify-end gap-3 px-6 py-4 border-t">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const modal = document.getElementById("update-modal");
+                    modal.close();
+                  }}
+                  className="px-4 py-2 border rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg"
+                >
+                  Update Member
                 </button>
               </div>
             </div>
