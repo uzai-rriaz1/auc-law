@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import axios from "axios";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { Trash } from "lucide-react";
@@ -11,6 +11,7 @@ const TeamComponent = () => {
   const [search, setSearch] = React.useState("");
 
   const token = useSelector((state) => state.user.token);
+  const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: ["offices"],
@@ -32,6 +33,8 @@ const TeamComponent = () => {
     },
     refetchInterval: 5000,
   });
+  let orgarray = data?.map((item) => item.organisation_id);
+  const orgid = orgarray[0];
 
   const { data: departList } = useQuery({
     queryKey: ["list"],
@@ -78,7 +81,6 @@ const TeamComponent = () => {
     },
     refetchOnWindowFocus: false,
     staleTime: 10000,
-    retry: false,
   });
 
   const createMember = useMutation({
@@ -100,10 +102,41 @@ const TeamComponent = () => {
     onError: (error) => {
       console.log("ERROR DETAIL →", error.response?.data);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["members"],
+      });
+    },
 
     refetchOnWindowFocus: false,
     staleTime: 10000,
     retry: false,
+  });
+
+  const deleteMember = useMutation({
+    mutationKey: ["deleteMember"],
+    mutationFn: async (member_id) => {
+      const res = await axios.delete(
+        `https://aucapi-staging.villaextech.com/team-members/${member_id}`,
+
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (res) console.log(res.data);
+      //   if (!res) console.log("data didnt fetched", res);
+      return await res.data;
+    },
+    onError: (error) => {
+      console.log("ERROR DETAIL →", error.response?.data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["members"],
+      });
+    },
   });
 
   const onSubmit = async (data) => {
@@ -210,7 +243,10 @@ const TeamComponent = () => {
               <button className="flex-1 bg-blue-600 text-white rounded-xl py-2 text-sm hover:bg-blue-700">
                 Edit
               </button>
-              <button className="flex bg-red-500 text-white rounded-2xl p-2 hover:bg-red-400">
+              <button
+                onClick={() => deleteMember.mutate(memeber.id)}
+                className="flex bg-red-500 text-white rounded-2xl p-2 hover:bg-red-400"
+              >
                 <Trash className="text-gray-300" />
               </button>
             </div>
@@ -294,6 +330,13 @@ const TeamComponent = () => {
                         {...register("mobile_no", {})}
                         className="w-full border rounded-xl px-3 py-2"
                         placeholder="Enter mobile number"
+                      />
+                      <input
+                        {...register("organisation_id", {
+                          required: true,
+                        })}
+                        type="hidden"
+                        value={orgid}
                       />
                     </div>
 
@@ -379,13 +422,6 @@ const TeamComponent = () => {
                             key={officename.id}
                             label={officename?.name}
                           >
-                            <input
-                              {...register("organisation_id", {
-                                required: true,
-                              })}
-                              type="hidden"
-                              value={officename.organisation_id}
-                            />
                             {departList
                               ?.filter(
                                 (option) => option.office_id === officename.id,
@@ -405,11 +441,9 @@ const TeamComponent = () => {
                         Secondary Departments
                       </label>
                       <select
-                        multiple
-                        {...register("secondary_department_ids", {
-                          setValueAs: (v) => (v ? [Number(v)] : []),
+                        {...register("primary_department_id", {
+                          required: true,
                         })}
-                        defaultValue={null}
                         className="w-full border rounded-xl px-3 py-2"
                       >
                         {data?.map((officename) => (
@@ -417,6 +451,13 @@ const TeamComponent = () => {
                             key={officename.id}
                             label={officename?.name}
                           >
+                            <input
+                              {...register("organisation_id", {
+                                required: true,
+                              })}
+                              type="hidden"
+                              value={officename.organisation_id}
+                            />
                             {departList
                               ?.filter(
                                 (option) => option.office_id === officename.id,
