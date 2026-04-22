@@ -1,12 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const TeamComponent = () => {
+  const router = useRouter();
   const { formState, handleSubmit, register, reset } = useForm();
   const {
     register: register2,
@@ -40,6 +42,28 @@ const TeamComponent = () => {
     },
     refetchInterval: 5000,
   });
+
+  const { data: memberstats } = useQuery({
+    queryKey: ["stats", memId],
+    queryFn: async () => {
+      try {
+        const res = await axios.get(
+          `https://aucapi-staging.villaextech.com/team-members/${memId}/stats`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        if (res) console.log(res);
+        if (res) return res?.data;
+      } catch (error) {
+        throw new "stats Didnt Got Fetched"();
+      }
+    },
+    enabled: !!memId,
+  });
+
   const orgid = data?.[0]?.organisation_id ?? 23;
 
   const { data: departList } = useQuery({
@@ -90,7 +114,7 @@ const TeamComponent = () => {
   });
 
   const { data: teammemeber } = useQuery({
-    queryKey: ["teammember"],
+    queryKey: ["teammember", memId],
     queryFn: async () => {
       const res = await axios.get(
         `https://aucapi-staging.villaextech.com/team-members/${memId}`,
@@ -105,7 +129,7 @@ const TeamComponent = () => {
       //   if (!res) console.log("data didnt fetched", res);
       return await res.data;
     },
-    refetchOnWindowFocus: false,
+    // refetchOnWindowFocus: false,
     // staleTime: 10000,
     enabled: !!memId,
   });
@@ -192,6 +216,14 @@ const TeamComponent = () => {
     },
   });
 
+  useEffect(() => {
+    if (teammemeber) {
+      reset2(teammemeber);
+      const modal = document.getElementById("update-modal");
+      modal.showModal();
+    }
+  }, [teammemeber, reset2]);
+
   const onSubmit = async (data) => {
     try {
       await createMember.mutateAsync(data);
@@ -202,18 +234,14 @@ const TeamComponent = () => {
     }
   };
 
-  const onSubmit2 = async (updatedata) => {
-    try {
-      await updateMember.mutate({
-        id: memId,
-        data: updatedata,
-      });
-      reset2();
-      const modal = document.getElementById("update-modal");
-      modal.close();
-    } catch (err) {
-      console.error(err);
-    }
+  const onSubmit2 = (updatedata) => {
+    updateMember.mutate({
+      id: memId,
+      data: updatedata,
+    });
+
+    const modal = document.getElementById("update-modal");
+    modal.close();
   };
 
   const filteredMembers =
@@ -304,46 +332,20 @@ const TeamComponent = () => {
             </button>
 
             <div className="flex gap-3 mt-3">
-              <button className="flex-1 border rounded-xl py-2 text-sm hover:bg-gray-50">
+              <button
+                onClick={() => {
+                  // setMemId(memeber.id);
+                  router.push(`/Team/MemberDetail/${memeber.id}`);
+                }}
+                className="flex-1 border rounded-xl py-2 text-sm hover:bg-gray-50"
+              >
                 View
               </button>
               <button
                 onClick={() => {
-                  const modal = document.getElementById("update-modal");
-                  modal.showModal();
+                  // const modal = document.getElementById("update-modal");
+                  // modal.showModal();
                   setMemId(memeber.id);
-
-                  reset2({
-                    fullname: teammemeber.fullname,
-                    email: teammemeber.email,
-                    password: "",
-                    organisation_id: teammemeber.organisation_id,
-
-                    primary_department: teammemeber.primary_department,
-                    secondary_department: teammemeber.secondary_department,
-                    secondary_department_ids:
-                      teammemeber.secondary_department_ids,
-                    mobile_no: teammemeber.mobile_no,
-                    alternative_no: teammemeber.alternative_no,
-                    date_of_birth: teammemeber.date_of_birth,
-                    date_of_join: teammemeber.date_of_join,
-                    cnic: teammemeber.cnic,
-                    qualification: teammemeber.qualification,
-                    designation: teammemeber.designation,
-                    advocate: teammemeber.advocate,
-                    address: teammemeber.address,
-                    city: teammemeber.city,
-                    lower_courts: teammemeber.lower_courts,
-                    lower_court_date: teammemeber.lower_court_date,
-                    higher_courts: teammemeber.higher_courts,
-                    higher_court_date: teammemeber.higher_court_date,
-                    supreme_courts: teammemeber.supreme_courts,
-                    supreme_court_date: teammemeber.supreme_court_date,
-
-                    role: teammemeber.role,
-                    location: teammemeber.location,
-                    status: teammemeber.status,
-                  });
                 }}
                 className="flex-1 bg-blue-600 text-white rounded-xl py-2 text-sm hover:bg-blue-700"
               >
