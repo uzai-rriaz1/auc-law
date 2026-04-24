@@ -61,11 +61,8 @@ export default function MemberInfo() {
         </div>
       </div>
 
-      {/* Main Grid */}
       <div className="grid grid-cols-3 gap-6 mt-6">
-        {/* Left */}
         <div className="col-span-2 space-y-6">
-          {/* Contact & Location */}
           <div className="grid grid-cols-2 gap-6 bg-white p-5 rounded-xl shadow-sm">
             <div>
               <h3 className="font-semibold mb-3">Contact</h3>
@@ -86,7 +83,6 @@ export default function MemberInfo() {
             </div>
           </div>
 
-          {/* Professional Details */}
           <div className="bg-white p-5 rounded-xl shadow-sm">
             <h3 className="font-semibold mb-4">Professional Details</h3>
             <div className="flex gap-4">
@@ -107,7 +103,6 @@ export default function MemberInfo() {
             </div>
           </div>
 
-          {/* Status */}
           <div className="bg-white p-5 rounded-xl shadow-sm flex justify-between items-center">
             <div>
               <h3 className="font-semibold">Member Status</h3>
@@ -125,9 +120,7 @@ export default function MemberInfo() {
           </div>
         </div>
 
-        {/* Right */}
         <div className="space-y-6">
-          {/* Department */}
           <div className="bg-white p-5 rounded-xl shadow-sm">
             <h3 className="font-semibold mb-3">Department</h3>
             <div className="bg-indigo-50 p-3 rounded-lg">
@@ -138,16 +131,13 @@ export default function MemberInfo() {
             </div>
           </div>
 
-          {/* Important Dates */}
           <div className="bg-white p-5 rounded-xl shadow-sm">
             <h3 className="font-semibold mb-3">Important Dates</h3>
             <p className="text-sm text-gray-500">No dates available</p>
           </div>
 
-          {/* Performance */}
           <div className="bg-white p-5 rounded-xl shadow-sm">
             <h3 className="font-semibold mb-3">Performance Stats</h3>
-
             <div className="text-sm space-y-2">
               <p>Total: 0</p>
               <p>Active: 0</p>

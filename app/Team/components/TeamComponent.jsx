@@ -272,7 +272,6 @@ const TeamComponent = () => {
         id="search"
         className="flex items-center justify-between gap-4 mb-6"
       >
-        {/* Search Input */}
         <div className="flex items-center w-full max-w-md border rounded-xl px-3 py-2 bg-white shadow-sm">
           <input
             value={search}
@@ -283,7 +282,6 @@ const TeamComponent = () => {
           />
         </div>
 
-        {/* Filter Dropdown */}
         <select className="border rounded-xl px-4 py-2 text-sm bg-white shadow-sm">
           <option>All Members</option>
           <option>Active</option>
@@ -368,7 +366,6 @@ const TeamComponent = () => {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           >
             <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-y-auto">
-              {/* Header */}
               <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-600 to-teal-500 text-white">
                 <div>
                   <h2 className="text-lg font-semibold">Add Team Member</h2>
@@ -389,7 +386,6 @@ const TeamComponent = () => {
               </div>
 
               <div className="p-6 space-y-6">
-                {/* BASIC INFO */}
                 <div className="border rounded-xl p-4">
                   <h3 className="text-sm font-semibold mb-4 text-gray-700">
                     Basic Information
