@@ -9,8 +9,33 @@ import { MessageSquare } from "lucide-react";
 import { LayoutDashboard } from "lucide-react";
 import AuthCheck from "@/app/authWrapper/authCheck";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 const Sidebar = () => {
+  const [openOfficeId, setOpenOfficeId] = React.useState(null);
   const router = useRouter();
+
+  const { data } = useQuery({
+    queryKey: ["offices"],
+    queryFn: async () => {
+      try {
+        const res = await axios.get(
+          "https://aucapi-staging.villaextech.com/offices",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        if (res) console.log(res);
+        if (res) return res?.data;
+      } catch (error) {
+        throw new "Offices Didnt Got Fetched"();
+      }
+    },
+    refetchInterval: 5000,
+  });
+
   return (
     <AuthCheck>
       <div className="max-h-screen w-64 bg-white border-r border-gray-200 pt-0 mt-0">
@@ -73,6 +98,65 @@ const Sidebar = () => {
               Accounts
             </li>
           </ul>
+        </div>
+        <div className="mt-5">
+          <p className="font-semibold text-gray-400 text-[10px] pl-2">
+            DEPARTMENTS
+          </p>
+
+          <div className="mt-3 flex flex-col gap-4">
+            {data?.map((office) => (
+              <div key={office.id}>
+                {/* Office Name */}
+                <div
+                  onClick={() =>
+                    setOpenOfficeId(
+                      openOfficeId === office.id ? null : office.id,
+                    )
+                  }
+                  className="flex items-center justify-between px-2 text-sm text-gray-600 font-medium cursor-pointer"
+                >
+                  <span>{office.name}</span>
+                  <span>{openOfficeId === office.id ? "⌃" : "⌄"}</span>
+                </div>
+
+                {/* Departments */}
+                {openOfficeId === office.id && (
+                  <ul className="mt-2 ml-6 flex flex-col gap-2">
+                    {office?.departments
+                      ?.filter((dep) => dep.office_id === office.id)
+                      .map((dep) => (
+                        <li
+                          onClick={() =>
+                            router.push(`/departments/${dep.name}`)
+                          }
+                          key={dep.id}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer text-sm
+                    ${
+                      dep.name === "Litigation"
+                        ? "bg-red-500 text-white"
+                        : dep.name === "Registration"
+                          ? "bg-gray-100"
+                          : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                        >
+                          <span
+                            className={`p-2 rounded-full text-xs
+                      ${
+                        dep.name === "Litigation"
+                          ? "bg-white text-red-500"
+                          : "bg-gray-200"
+                      }`}
+                          ></span>
+
+                          {dep.name}
+                        </li>
+                      ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </AuthCheck>
