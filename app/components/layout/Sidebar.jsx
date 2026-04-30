@@ -68,7 +68,10 @@ const Sidebar = () => {
               <UsersRound size={30} className="bg-gray-200 p-2 rounded-xl " />{" "}
               Team
             </li>
-            <li className="text-gray-500 text-[13px] font-bold hover:text-gray-700 text-sm flex items-center gap-1">
+            <li
+              onClick={() => router.push("/Cases")}
+              className="text-gray-500 text-[13px] font-bold hover:text-gray-700 text-sm flex items-center gap-1"
+            >
               <Briefcase size={30} className="bg-gray-200 p-2 rounded-xl " />
               Cases
             </li>
